@@ -6,7 +6,7 @@
 /*   By: yoyassin <yoyassin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/27 22:46:55 by merras            #+#    #+#             */
-/*   Updated: 2019/10/24 08:26:23 by merras           ###   ########.fr       */
+/*   Updated: 2019/10/24 14:09:36 by merras           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,7 @@ static void	init_terminal_data(void)
 	char	*termtype;
 	int		success;
 
-	termtype = read_env("TERM");
+	termtype = getenv("TERM");
 	if (!termtype)
 		exit(ft_perror(EXEC_NAME, NULL, N_TRM));
 	success = tgetent(0, termtype);
@@ -68,8 +68,8 @@ void		terminal_resized(void)
 	else
 	{
 		ioctl(1, TIOCGWINSZ, &CONFIG(wsize));
-		if (CONFIG(option_width) != CONFIG(wsize).ws_cols / CONFIG(field_size)
-		|| CONFIG(options_height) != CONFIG(wsize).ws_rows)
+		if (CONFIG(options_width) != CONFIG(wsize).ws_col / CONFIG(field_size)
+		|| CONFIG(options_height) != CONFIG(wsize).ws_row)
 			render_selection();
 	}
 }

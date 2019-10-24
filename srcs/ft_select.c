@@ -6,7 +6,7 @@
 /*   By: merras <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/10/24 01:51:05 by merras            #+#    #+#             */
-/*   Updated: 2019/10/24 08:26:14 by merras           ###   ########.fr       */
+/*   Updated: 2019/10/24 14:09:33 by merras           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,7 @@ t_select	*ft_select_config(t_select *set)
 	return (get);
 }
 
-static int generic_signal_handler(int signal)
+static void generic_signal_handler(int signal)
 {
 	if (signal == SIGCONT)
 		init_terminal();
@@ -59,18 +59,20 @@ static void	init_selection(int argc, char **argv)
 	int i;
 
 	set_signal_handlers();
-	if ((CONFIG(options_flags) = ft_memalloc(argc)))
+	if (!(CONFIG(options_flags) = ft_memalloc(argc)))
 		exit(0);
 	CONFIG(options) = argv;
 	CONFIG(options_count) = argc;
 	CONFIG(current_option) = 0;
 	CONFIG(field_size) = 0;
-	while (argc-- >= 0)
+	while (--argc > 0)
 	{
 		i = ft_strlen(argv[argc]);
 		CONFIG(field_size) = CONFIG(field_size) < i ? i : CONFIG(field_size);
 	}
 	CONFIG(field_size)++;
+	F_SET(CONFIG(options_flags)[0], F_HOVERED);
+	ioctl(1, TIOCGWINSZ, &CONFIG(wsize));
 }
 
 int			main(int argc, char **argv)
@@ -79,7 +81,8 @@ int			main(int argc, char **argv)
 
 	if (argc == 1)
 		return (0);
+	ft_select_config(&config);
 	init_terminal();
-	init_selection(int argc, char **argv);
+	init_selection(argc - 1, argv + 1);
 	ft_select_listener();
 }

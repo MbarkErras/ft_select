@@ -6,7 +6,7 @@
 /*   By: merras <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/10/24 05:29:55 by merras            #+#    #+#             */
-/*   Updated: 2019/10/24 08:20:03 by merras           ###   ########.fr       */
+/*   Updated: 2019/10/24 14:09:38 by merras           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,6 @@ int	is_enough_area(void)
 	int				capacity;
 
 	ioctl(1, TIOCGWINSZ, &wsize);
-	capacity = wsize.ws_cols / CONFIG(field_size) * wsize.ws_rows;
+	capacity = wsize.ws_col / CONFIG(field_size) * wsize.ws_row;
 	return (capacity >= CONFIG(options_count));
 }
