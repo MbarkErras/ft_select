@@ -6,7 +6,7 @@
 /*   By: merras <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/10/24 01:36:35 by merras            #+#    #+#             */
-/*   Updated: 2019/10/24 14:09:39 by merras           ###   ########.fr       */
+/*   Updated: 2019/10/28 19:53:58 by merras           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,7 +25,7 @@
 
 typedef struct	s_select
 {
-	char			**options;
+	t_list			*options;
 	char			*options_flags;
 	int				options_count;
 	int				current_option;

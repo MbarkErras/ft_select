@@ -6,7 +6,7 @@
 /*   By: merras <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/10/24 01:51:05 by merras            #+#    #+#             */
-/*   Updated: 2019/10/24 14:09:33 by merras           ###   ########.fr       */
+/*   Updated: 2019/10/28 19:53:53 by merras           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,14 +61,15 @@ static void	init_selection(int argc, char **argv)
 	set_signal_handlers();
 	if (!(CONFIG(options_flags) = ft_memalloc(argc)))
 		exit(0);
-	CONFIG(options) = argv;
 	CONFIG(options_count) = argc;
 	CONFIG(current_option) = 0;
 	CONFIG(field_size) = 0;
+	CONFIG(options) = NULL;
 	while (--argc > 0)
 	{
 		i = ft_strlen(argv[argc]);
 		CONFIG(field_size) = CONFIG(field_size) < i ? i : CONFIG(field_size);
+		list_push_back(&CONFIG(options), ft_strdup(argv[argc]))
 	}
 	CONFIG(field_size)++;
 	F_SET(CONFIG(options_flags)[0], F_HOVERED);
