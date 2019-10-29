@@ -6,7 +6,7 @@
 /*   By: merras <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/10/24 01:51:05 by merras            #+#    #+#             */
-/*   Updated: 2019/10/28 19:53:53 by merras           ###   ########.fr       */
+/*   Updated: 2019/10/29 04:30:07 by merras           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,37 +21,41 @@ t_select	*ft_select_config(t_select *set)
 	return (get);
 }
 
-static void generic_signal_handler(int signal)
+static void	generic_signal_handler(int s)
 {
-	if (signal == SIGCONT)
+	if (s == SIGCONT)
+	{
 		init_terminal();
-	else if (signal == SIGTTOU || signal == SIGTTIN || signal == SIGTSTP)
-		reset_input_mode();
-	else if (signal == SIGWINCH) 
-		terminal_resized();
-	else
+		tputs(tgetstr("ti", NULL), 1, termcaps_putchar);
+		tputs(tgetstr("vi", NULL), 1, termcaps_putchar);
+		render_selection();
+		signal(SIGTSTP, generic_signal_handler);
+	}
+	else if (s == SIGTTOU || s == SIGTTIN || s == SIGTSTP)
 	{
 		reset_input_mode();
-		exit (0);
+		tputs(tgetstr("te", NULL), 1, termcaps_putchar);
+		tputs(tgetstr("ve", NULL), 1, termcaps_putchar);
+		signal(SIGTSTP, SIG_DFL);
+		ioctl(0, TIOCSTI, "\32");
 	}
+	else if (s == SIGWINCH)
+		terminal_resized();
+	else
+		ft_select_exit();
 }
 
 static void	set_signal_handlers(void)
 {
-	signal(SIGCONT, generic_signal_handler);
-	signal(SIGWINCH, generic_signal_handler);
-	signal(SIGTSTP, generic_signal_handler);
-	signal(SIGUSR1, generic_signal_handler);
-	signal(SIGUSR2, generic_signal_handler);
-	signal(SIGPROF, generic_signal_handler);
-	signal(SIGVTALRM, generic_signal_handler);
-	signal(SIGXFSZ, generic_signal_handler);
-	signal(SIGXCPU, generic_signal_handler);
-	signal(SIGTERM, generic_signal_handler);
-	signal(SIGALRM, generic_signal_handler);
-	signal(SIGPIPE, generic_signal_handler);
-	signal(SIGINT, generic_signal_handler);
-	signal(SIGHUP, generic_signal_handler);
+	int sig;
+
+	sig = 0;
+	while (++sig < 32)
+	{
+		if (sig == 29 || sig == 23 || sig == 20 || sig == SIGURG)
+			continue ;
+		signal(sig, generic_signal_handler);
+	}
 }
 
 static void	init_selection(int argc, char **argv)
@@ -59,21 +63,20 @@ static void	init_selection(int argc, char **argv)
 	int i;
 
 	set_signal_handlers();
-	if (!(CONFIG(options_flags) = ft_memalloc(argc)))
-		exit(0);
 	CONFIG(options_count) = argc;
 	CONFIG(current_option) = 0;
 	CONFIG(field_size) = 0;
 	CONFIG(options) = NULL;
-	while (--argc > 0)
+	while (--argc >= 0)
 	{
 		i = ft_strlen(argv[argc]);
 		CONFIG(field_size) = CONFIG(field_size) < i ? i : CONFIG(field_size);
-		list_push_back(&CONFIG(options), ft_strdup(argv[argc]))
+		list_push_back(&CONFIG(options), list_create_node(t_option_create(
+		(t_option){ft_strdup(argv[argc]), 0}), sizeof(char *)));
 	}
-	CONFIG(field_size)++;
-	F_SET(CONFIG(options_flags)[0], F_HOVERED);
-	ioctl(1, TIOCGWINSZ, &CONFIG(wsize));
+	CONFIG(field_size) += 1;
+	F_SET(TLIST(CONFIG(options), t_option)->flags, F_HOVERED);
+	ioctl(0, TIOCGWINSZ, &CONFIG(wsize));
 }
 
 int			main(int argc, char **argv)
@@ -84,6 +87,9 @@ int			main(int argc, char **argv)
 		return (0);
 	ft_select_config(&config);
 	init_terminal();
+	tputs(tgetstr("ti", NULL), 1, termcaps_putchar);
+	tputs(tgetstr("vi", NULL), 1, termcaps_putchar);
 	init_selection(argc - 1, argv + 1);
 	ft_select_listener();
+	ft_select_exit();
 }

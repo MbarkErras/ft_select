@@ -6,7 +6,7 @@
 /*   By: yoyassin <yoyassin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/27 22:46:55 by merras            #+#    #+#             */
-/*   Updated: 2019/10/28 16:52:10 by merras           ###   ########.fr       */
+/*   Updated: 2019/10/29 03:58:43 by merras           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,18 +35,16 @@ static void	set_input_mode(void)
 {
 	struct termios	tattr;
 
-	if (!isatty(STDIN_FILENO))
+	if (!isatty(STDIN_FILENO) || !isatty(2))
 		exit(ft_perror(EXEC_NAME, NULL, N_TTY));
 	tcgetattr(STDIN_FILENO, &tattr);
 	tattr.c_lflag &= ~(ICANON | ECHO);
-	tattr.c_cc[VMIN] = 1;
-	tattr.c_cc[VTIME] = 0;
 	tcsetattr(STDIN_FILENO, TCSAFLUSH, &tattr);
 }
 
 void		reset_input_mode(void)
 {
-	tcsetattr(STDIN_FILENO, TCSANOW, &CONFIG(saved_attr));
+	tcsetattr(STDIN_FILENO, TCSAFLUSH, &CONFIG(saved_attr));
 }
 
 void		init_terminal(void)
@@ -62,14 +60,12 @@ void		terminal_resized(void)
 	{
 		tputs(tgetstr("cl", NULL), 1, termcaps_putchar);
 		ft_perror(EXEC_NAME, NULL, T_SZE);
-		while (1)
-			continue ;
+		CONFIG(enough_terminal) = 0;
 	}
 	else
 	{
-		ioctl(1, TIOCGWINSZ, &CONFIG(wsize));
-		if (CONFIG(options_width) != CONFIG(wsize).ws_col / CONFIG(field_size)
-		|| CONFIG(options_height) != CONFIG(wsize).ws_row)
-			render_selection();
+		ioctl(0, TIOCGWINSZ, &CONFIG(wsize));
+		render_selection();
+		CONFIG(enough_terminal) = 1;
 	}
 }

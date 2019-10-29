@@ -2,6 +2,7 @@ NAME=ft_select
 
 SRCS=	ft_select.c \
 		ft_select_listener.c \
+		ft_select_utilities.c \
 		rendering.c \
 		checkers.c \
 		terminal.c \
@@ -22,10 +23,10 @@ all: $(NAME)
 
 $(NAME): $(OBJS_PATH) $(INCLUDES)/ft_select.h
 	make -C $(LIBS_DIR)/centropy
-	gcc $(OBJS_PATH) -I$(INCLUDES) -I$(LIBS_DIR)/centropy/includes $(LIBS_DIR)/*/*.a -o $(NAME) -ltermcap
+	gcc $(OBJS_PATH) -I$(INCLUDES) -I$(LIBS_DIR)/centropy/includes -I$(LIBS_DIR)/simplist/includes $(LIBS_DIR)/*/*.a -o $(NAME) -ltermcap
 
 $(OBJS_PATH): $(OBJS_DIR)/%.o : $(SRCS_DIR)/%.c | $(OBJS_DIR)
-	gcc $(FLAGS) -I$(INCLUDES) -I$(LIBS_DIR)/centropy/includes -c $< -o $@
+	gcc $(FLAGS) -I$(INCLUDES) -I$(LIBS_DIR)/centropy/includes -I$(LIBS_DIR)/simplist/includes -c $< -o $@
 
 $(OBJS_DIR):
 	mkdir $(OBJS_DIR)

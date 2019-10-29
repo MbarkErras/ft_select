@@ -6,7 +6,7 @@
 /*   By: merras <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/10/24 01:36:35 by merras            #+#    #+#             */
-/*   Updated: 2019/10/28 19:53:58 by merras           ###   ########.fr       */
+/*   Updated: 2019/10/29 04:29:59 by merras           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,44 +19,56 @@
 # include <sys/ioctl.h>
 # include <unistd.h>
 # include "centropy.h"
+# include "simplist.h"
 
 # define EXEC_NAME "ft_select"
 # define CONFIG(x) ft_select_config(NULL)->x
 
-typedef struct	s_select
+typedef struct		s_option
+{
+	char			*value;
+	char			flags;
+}					t_option;
+
+t_option			*t_option_create(t_option o);
+void				t_option_delete(void *o);
+
+typedef struct		s_select
 {
 	t_list			*options;
-	char			*options_flags;
+	t_list			*current_option_node;
 	int				options_count;
 	int				current_option;
 	int				field_size;
 	int				options_width;
 	int				options_height;
+	int				enough_terminal;
 	struct winsize	wsize;
 	struct termios	saved_attr;
-}				t_select;
+}					t_select;
 
-t_select		*ft_select_config(t_select *set);
+t_select			*ft_select_config(t_select *set);
 
-void			init_terminal(void);
-void			reset_input_mode(void);
-void			terminal_resized(void);
-int				termcaps_putchar(int c);
+void				ft_select_exit(void);
 
-int				is_enough_area(void);
+void				init_terminal(void);
+void				reset_input_mode(void);
+void				terminal_resized(void);
+int					termcaps_putchar(int c);
 
-void			ft_select_listener(void);
-void			render_selection(void);
-void			render_option(char *option, int mode);
-void			move_option(char direction);
-void			select_option(void);
-void			delete_option(void);
-void			cancel_selection(void);
-void			submit_options(void);
+int					is_enough_area(void);
+
+void				ft_select_listener(void);
+void				render_selection(void);
+void				render_option(t_list *option);
+void				move_option(char direction);
+void				select_option(void);
+void				delete_option(void);
+void				cancel_selection(void);
+void				submit_options(void);
 
 # define F_SELECTED 0
 # define F_HOVERED 1
-# define F_DELETED 2
 
 # define ESC 27
 # define IS_CSI(x) ((x)[0] == ESC && (x)[1] == '[')
@@ -65,14 +77,14 @@ void			submit_options(void);
 # define IS_RIGHT(x) (IS_CSI(x) && (x)[2] == 'C')
 # define IS_LEFT(x) (IS_CSI(x) && (x)[2] == 'D')
 # define IS_ARROW(x) (IS_UP(x) || IS_DOWN(x) || IS_RIGHT(x) || IS_LEFT(x))
-# define IS_DELETE(x) (x[0] == 0 && x[1] == 0 && x[2] == 0 && x[3] == 0)
+# define IS_DELETE(x) (x[0] == 27 && x[1] == '[' && x[2] == '3' && x[3] == '~')
 
 # define U 'A'
 # define D 'B'
 # define R 'C'
 # define L 'D'
 
-int				ft_perror(char *command, char *arg, int err);
+int					ft_perror(char *command, char *arg, int err);
 
 # define T_SZE 7
 # define N_TRM 8
@@ -94,5 +106,7 @@ int				ft_perror(char *command, char *arg, int err);
 # define F_BSET(x, f) (x |= f)
 # define F_UNSET(x, f) (x &= ~(1 << f))
 # define F_BUNSET(x, f) (x &= ~f)
+
+# define TLIST(name, type) ((type *)name->content)
 
 #endif
